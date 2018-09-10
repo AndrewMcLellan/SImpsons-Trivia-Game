@@ -11,11 +11,18 @@ class GameMainContainer extends Component {
       quote: null,
       correctAnswer: '',
       characters: [],
-      correctnessNotice: ''
+      correctnessNotice: '',
+      round: {
+        id: null,
+        score: 0,
+        totalAsked: 0,
+        totalQuestions: 10
+      }
     }
     this.handleRetriveQuestion = this.handleRetriveQuestion.bind(this)
     this.checkCorrectness = this.checkCorrectness.bind(this)
   }
+
 
   handleRetriveQuestion(event) {
     fetch(`https://thesimpsonsquoteapi.glitch.me/quotes`)
@@ -38,36 +45,76 @@ class GameMainContainer extends Component {
       })
       .catch(error => console.error(`Error in fetch: ${error.message}`));
 
-      fetch(`/api/v1/characters`)
-        .then(response => {
-          if (response.ok) {
-            return response;
-          } else {
-            let errorMessage = `${response.status} (${response.statusText})`,
-              error = new Error(errorMessage);
-            throw(error);
-          }
+    fetch(`/api/v1/characters`)
+      .then(response => {
+        if (response.ok) {
+          return response;
+        } else {
+          let errorMessage = `${response.status} (${response.statusText})`,
+            error = new Error(errorMessage);
+          throw(error);
+        }
+      })
+      .then(response => response.json())
+      .then(response => {
+        this.setState({
+          characters: response
         })
-        .then(response => response.json())
-        .then(response => {
-          this.setState({
-            characters: response
-          })
-        })
-        .catch(error => console.error(`Error in fetch: ${error.message}`));
+      })
+      .catch(error => console.error(`Error in fetch: ${error.message}`));
     }
 
     checkCorrectness(formPayLoad) {
+      let newScore = this.state.round.score
+      let totalQuestionsAsked = this.state.round.totalAsked
       if (this.state.correctAnswer == formPayLoad.answer) {
-        this.setState({ correctnessNotice: "You Are Correct!" })
+        newScore += 1
+        totalQuestionsAsked += 1
+        debugger;
+        this.setState({
+          correctnessNotice: "You Are Correct!",
+          round: {
+            id: this.state.round.id,
+            score: newScore,
+            totalAsked: totalQuestionsAsked,
+            totalQuestions: 10
+          }
+        })
       } else if (formPayLoad.answer == "" || formPayLoad.answer == " ") {
         this.setState({ correctnessNotice: "You Must Submit An Answer" })
       } else {
-        this.setState({ correctnessNotice: "Sorry Wrong Answer"})
+        totalQuestionsAsked += 1
+        this.setState({
+          correctnessNotice: "Sorry Wrong Answer",
+          round: {
+            id: this.state.round.id,
+            score: newScore,
+            totalAsked: totalQuestionsAsked,
+            totalQuestions: 10
+          }
+         })
       }
     }
 
+    componentDidMount() {
+      fetch(`/api/v1/rounds/new`)
+      .then(response => response.json())
+      .then(response => {
+        debugger;
+        this.setState({
+          round: {
+            id: response.id,
+            score: response.total_correct,
+            totalAsked: response.total_questions_asked,
+            totalQuestions: response.total_questions
+          }
+        })
+      })
+    }
+
+
   render() {
+    console.log(this.state.round)
     function shuffle(a) {
         for (let i = a.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
