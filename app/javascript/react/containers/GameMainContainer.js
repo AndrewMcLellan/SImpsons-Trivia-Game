@@ -60,6 +60,8 @@ class GameMainContainer extends Component {
     checkCorrectness(formPayLoad) {
       if (this.state.correctAnswer == formPayLoad.answer) {
         this.setState({ correctnessNotice: "You Are Correct!" })
+      } else if (formPayLoad.answer == "" || formPayLoad.answer == " ") {
+        this.setState({ correctnessNotice: "You Must Submit An Answer" })
       } else {
         this.setState({ correctnessNotice: "Sorry Wrong Answer"})
       }
