@@ -38,7 +38,7 @@ class DashboardShowContainer extends Component {
           <div>
             <img src={this.state.quote.image}/>
           </div>
-          <Link to="">Click Here to Play Simpsons Quote Trivia!!</Link>
+          <Link to="/game">Click Here to Play Simpsons Quote Trivia!!</Link>
         </center>
       </div>
     )
