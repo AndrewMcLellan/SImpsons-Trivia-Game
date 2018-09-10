@@ -10,13 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_09_10_131052) do
+ActiveRecord::Schema.define(version: 2018_09_10_145753) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "characters", force: :cascade do |t|
     t.string "full_name", null: false
+  end
+
+  create_table "rounds", force: :cascade do |t|
+    t.integer "total_questions", default: 10
+    t.integer "total_questions_asked", default: 0
+    t.integer "total_correct", default: 0
   end
 
   create_table "users", force: :cascade do |t|

@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import ButtonTile from '../components/ButtonTile'
 import QuestionTile from '../components/QuestionTile'
 import OptionsTile from '../components/OptionsTile'
+import AnswerContainer from './AnswerContainer'
 
 class GameMainContainer extends Component {
   constructor(props) {
@@ -9,11 +10,13 @@ class GameMainContainer extends Component {
     this.state = {
       quote: null,
       correctAnswer: '',
-      characters: []
+      characters: [],
+      correctnessNotice: ''
     }
     this.handleRetriveQuestion = this.handleRetriveQuestion.bind(this)
+    this.checkCorrectness = this.checkCorrectness.bind(this)
   }
-  
+
   handleRetriveQuestion(event) {
     fetch(`https://thesimpsonsquoteapi.glitch.me/quotes`)
       .then(response => {
@@ -54,8 +57,15 @@ class GameMainContainer extends Component {
         .catch(error => console.error(`Error in fetch: ${error.message}`));
     }
 
-  render() {
+    checkCorrectness(formPayLoad) {
+      if (this.state.correctAnswer == formPayLoad.answer) {
+        this.setState({ correctnessNotice: "You Are Correct!" })
+      } else {
+        this.setState({ correctnessNotice: "Sorry Wrong Answer"})
+      }
+    }
 
+  render() {
     function shuffle(a) {
         for (let i = a.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -88,7 +98,6 @@ class GameMainContainer extends Component {
 
     let optionsTile;
     if (this.state.quote) {
-
       optionsTile = options.map(character => {
         return(
           <OptionsTile
@@ -96,6 +105,18 @@ class GameMainContainer extends Component {
             />
         )
       })
+    }
+
+    let answerContainer;
+    if (this.state.quote) {
+      answerContainer =
+          <AnswerContainer
+            checkCorrectness={this.checkCorrectness}
+            />
+    }
+    let result
+    if (this.state.correctnessNotice) {
+      result = <div>{this.state.correctnessNotice}</div>
     }
 
     return(
@@ -106,6 +127,8 @@ class GameMainContainer extends Component {
           />
         {questionTile}
         {optionsTile}
+        {answerContainer}
+        {result}
       </div>
     )
   }
