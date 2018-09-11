@@ -3,7 +3,7 @@ import React from 'react'
 const ButtonTile = (props) => {
 
   return(
-    <div onClick={props.handleRetriveQuestion}>
+    <div onClick={props.handleClick}>
       <button>Retrieve Question</button>
     </div>
 
