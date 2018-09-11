@@ -14,6 +14,7 @@ class GameMainContainer extends Component {
       characters: [],
       correctnessNotice: '',
       questionAsked: false,
+      questionAnswered: false,
       round: {
         id: null,
         score: 0,
@@ -144,12 +145,10 @@ class GameMainContainer extends Component {
 
 
     let options = []
-    let count = 0
     this.state.characters.forEach(character => {
       if (character.full_name != this.state.correctAnswer &&
-      count < 3) {
+      options.length < 3) {
         options.push(character.full_name)
-        count += 1
       }
     })
 
@@ -171,7 +170,7 @@ class GameMainContainer extends Component {
 
 
     let buttonTile;
-    if (this.state.questionAsked != null) {
+    if (this.state.questionAsked == false) {
       buttonTile = <ButtonTile
         handleClick={this.handleClick}
         questionAnswered={this.state.questionAnswered}
