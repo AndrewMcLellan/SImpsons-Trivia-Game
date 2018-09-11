@@ -3,6 +3,7 @@ import ButtonTile from '../components/ButtonTile'
 import QuestionTile from '../components/QuestionTile'
 import OptionsTile from '../components/OptionsTile'
 import AnswerContainer from './AnswerContainer'
+import ScoreTile from '../components/ScoreTile'
 
 class GameMainContainer extends Component {
   constructor(props) {
@@ -12,6 +13,7 @@ class GameMainContainer extends Component {
       correctAnswer: '',
       characters: [],
       correctnessNotice: '',
+      questionAsked: false,
       round: {
         id: null,
         score: 0,
@@ -21,10 +23,11 @@ class GameMainContainer extends Component {
     }
     this.handleRetriveQuestion = this.handleRetriveQuestion.bind(this)
     this.checkCorrectness = this.checkCorrectness.bind(this)
+    this.handleClick = this.handleClick.bind(this)
   }
 
 
-  handleRetriveQuestion(event) {
+  handleRetriveQuestion() {
     fetch(`https://thesimpsonsquoteapi.glitch.me/quotes`)
       .then(response => {
         if (response.ok) {
@@ -64,15 +67,24 @@ class GameMainContainer extends Component {
       .catch(error => console.error(`Error in fetch: ${error.message}`));
     }
 
+
+    handleClick(event) {
+      this.handleRetriveQuestion()
+      this.setState({
+        questionAsked: true
+      })
+    }
+
+
     checkCorrectness(formPayLoad) {
       let newScore = this.state.round.score
       let totalQuestionsAsked = this.state.round.totalAsked
       if (this.state.correctAnswer == formPayLoad.answer) {
         newScore += 1
         totalQuestionsAsked += 1
-        debugger;
         this.setState({
           correctnessNotice: "You Are Correct!",
+          questionAsked: true,
           round: {
             id: this.state.round.id,
             score: newScore,
@@ -86,6 +98,7 @@ class GameMainContainer extends Component {
         totalQuestionsAsked += 1
         this.setState({
           correctnessNotice: "Sorry Wrong Answer",
+          questionAnswered: true,
           round: {
             id: this.state.round.id,
             score: newScore,
@@ -100,7 +113,6 @@ class GameMainContainer extends Component {
       fetch(`/api/v1/rounds/new`)
       .then(response => response.json())
       .then(response => {
-        debugger;
         this.setState({
           round: {
             id: response.id,
@@ -114,7 +126,6 @@ class GameMainContainer extends Component {
 
 
   render() {
-    console.log(this.state.round)
     function shuffle(a) {
         for (let i = a.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -123,12 +134,14 @@ class GameMainContainer extends Component {
         return a;
     }
 
+
     let questionTile;
     if (this.state.quote) {
       questionTile = <QuestionTile
         quote={this.state.quote}
         />
     }
+
 
     let options = []
     let count = 0
@@ -156,11 +169,23 @@ class GameMainContainer extends Component {
       })
     }
 
+
+    let buttonTile;
+    if (this.state.questionAsked != null) {
+      buttonTile = <ButtonTile
+        handleClick={this.handleClick}
+        questionAnswered={this.state.questionAnswered}
+        />
+    }
+
+
+
     let answerContainer;
     if (this.state.quote) {
       answerContainer =
           <AnswerContainer
             checkCorrectness={this.checkCorrectness}
+            handleRetriveQuestion={this.handleRetriveQuestion}
             />
     }
     let result
@@ -168,16 +193,18 @@ class GameMainContainer extends Component {
       result = <div>{this.state.correctnessNotice}</div>
     }
 
+
     return(
       <div>
         Welcome to the game!
-        <ButtonTile
-          handleRetriveQuestion={this.handleRetriveQuestion}
-          />
+        {buttonTile}
         {questionTile}
         {optionsTile}
         {answerContainer}
         {result}
+        <ScoreTile
+          round={this.state.round}
+          />
       </div>
     )
   }

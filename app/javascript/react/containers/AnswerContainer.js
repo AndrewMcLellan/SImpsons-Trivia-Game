@@ -23,6 +23,11 @@ class AnswerContainer extends Component {
       answer: this.state.answerString
     }
     this.props.checkCorrectness(formPayLoad)
+    this.props.handleRetriveQuestion()
+    this.setState({
+      answerString: ''
+    })
+
   }
 
   render() {

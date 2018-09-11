@@ -28,13 +28,6 @@ ActiveRecord::Schema.define(version: 2018_09_10_145753) do
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
-    t.string "first_name", null: false
-    t.string "last_name", null: false
-    t.string "location"
-    t.string "mlb_team"
-    t.string "nlf_team"
-    t.string "nba_team"
-    t.string "nhl_team"
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
