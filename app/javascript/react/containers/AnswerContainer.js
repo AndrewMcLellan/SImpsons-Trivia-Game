@@ -23,14 +23,20 @@ class AnswerContainer extends Component {
       answer: this.state.answerString
     }
     this.props.checkCorrectness(formPayLoad)
-    this.props.handleRetriveQuestion()
-    this.setState({
-      answerString: ''
-    })
+    if (this.state.answerString.replace(/\s+/, "") != '') {
+      this.props.handleRetriveQuestion()
+    }
+    this.setState({ answerString: '' })
 
   }
 
   render() {
+    let submitButton;
+    if (this.props.questionAnswered == false) {
+      submitButton = <div className="button-group">
+        <input className="button" type="submit" value="Submit" onClick={this.handleSubmit}  />
+      </div>
+    }
 
     return(
       <div>
@@ -40,9 +46,7 @@ class AnswerContainer extends Component {
           name="answer"
           handleAnswerChange={this.handleAnswerChange}
           />
-          <div className="button-group">
-            <input className="button" type="submit" value="Submit" onClick={this.handleSubmit}  />
-          </div>
+        {submitButton}
       </div>
     )
   }

@@ -12,9 +12,12 @@ class GameMainContainer extends Component {
       quote: null,
       correctAnswer: '',
       characters: [],
+      options: [],
       correctnessNotice: '',
       questionAsked: false,
+      questionSubmitted: false,
       questionAnswered: false,
+      gameStarted: false,
       round: {
         id: null,
         score: 0,
@@ -27,7 +30,9 @@ class GameMainContainer extends Component {
     this.handleClick = this.handleClick.bind(this)
   }
 
-
+// retrieves the question as well as retrieves (4) multiple choice options. Only
+// 3 will be used. we pull 4 to assume that one of them will be the correctAnswer.
+// this allows the program to chose only options that ARE NOT the correct answer.
   handleRetriveQuestion() {
     fetch(`https://thesimpsonsquoteapi.glitch.me/quotes`)
       .then(response => {
@@ -68,15 +73,16 @@ class GameMainContainer extends Component {
       .catch(error => console.error(`Error in fetch: ${error.message}`));
     }
 
-
+//
     handleClick(event) {
       this.handleRetriveQuestion()
       this.setState({
+        gameStarted: true,
         questionAsked: true
       })
     }
 
-
+// Checks the correctness of the answer and sets the state of the score
     checkCorrectness(formPayLoad) {
       let newScore = this.state.round.score
       let totalQuestionsAsked = this.state.round.totalAsked
@@ -85,7 +91,8 @@ class GameMainContainer extends Component {
         totalQuestionsAsked += 1
         this.setState({
           correctnessNotice: "You Are Correct!",
-          questionAsked: true,
+          questionAsked: false,
+          questionSubmitted: false,
           round: {
             id: this.state.round.id,
             score: newScore,
@@ -93,13 +100,14 @@ class GameMainContainer extends Component {
             totalQuestions: 10
           }
         })
-      } else if (formPayLoad.answer == "" || formPayLoad.answer == " ") {
+      } else if (formPayLoad.answer.replace(/\s+/, "") == "") {
         this.setState({ correctnessNotice: "You Must Submit An Answer" })
       } else {
         totalQuestionsAsked += 1
         this.setState({
           correctnessNotice: "Sorry Wrong Answer",
-          questionAnswered: true,
+          questionAsked: false,
+          questionSubmitted: false,
           round: {
             id: this.state.round.id,
             score: newScore,
@@ -109,7 +117,9 @@ class GameMainContainer extends Component {
          })
       }
     }
-
+  
+// Creates Rounds upon loading the page. BUG no refresh is allowed during game,
+// or session will reset
     componentDidMount() {
       fetch(`/api/v1/rounds/new`)
       .then(response => response.json())
@@ -143,7 +153,8 @@ class GameMainContainer extends Component {
         />
     }
 
-
+// chooses 3 of 4 options in the multiple choice array, excluding any that match
+// the correct answer. Adds only 3 options.
     let options = []
     this.state.characters.forEach(character => {
       if (character.full_name != this.state.correctAnswer &&
@@ -152,9 +163,11 @@ class GameMainContainer extends Component {
       }
     })
 
-
+    // pushes the correctAnswer into the options array
     options.push(this.state.correctAnswer)
+    // shuffles options
     options = shuffle(options)
+
 
 
     let optionsTile;
@@ -170,10 +183,9 @@ class GameMainContainer extends Component {
 
 
     let buttonTile;
-    if (this.state.questionAsked == false) {
+    if (this.state.gameStarted == false) {
       buttonTile = <ButtonTile
         handleClick={this.handleClick}
-        questionAnswered={this.state.questionAnswered}
         />
     }
 
@@ -183,6 +195,7 @@ class GameMainContainer extends Component {
     if (this.state.quote) {
       answerContainer =
           <AnswerContainer
+            questionAnswered={this.state.questionAnswered}
             checkCorrectness={this.checkCorrectness}
             handleRetriveQuestion={this.handleRetriveQuestion}
             />
@@ -192,10 +205,9 @@ class GameMainContainer extends Component {
       result = <div>{this.state.correctnessNotice}</div>
     }
 
-
-    return(
-      <div>
-        Welcome to the game!
+    let game;
+    if (this.state.round.totalAsked < 10) {
+      game = <div>
         {buttonTile}
         {questionTile}
         {optionsTile}
@@ -204,6 +216,19 @@ class GameMainContainer extends Component {
         <ScoreTile
           round={this.state.round}
           />
+      </div>
+    } else {
+      game = <div>
+        Game Over!<br/>
+        your score is:<br/>
+        {this.state.round.score}
+      </div>
+    }
+
+
+    return(
+      <div>
+        {game}
       </div>
     )
   }
